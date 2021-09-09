@@ -1,132 +1,109 @@
-### Autenticação
+### Conta
+- aws.amazon.com
+- cartão crédito internacional obrigatório
+- 12 meses gratuitos: free-tier - t2.micro free-tier 750h (1 mes) ligada ou 12 meses
+- sempre gratuito
+- testes 
 
+### Autenticação
 - iam : ativar segundo fator de autenticação
 	- Activate MFA on root account, escanear o qr code c/ o Google Autenticator: tokens (one time passwords)
 
-
-
 ### Definições
+- alta disponibilidade
 - e2: elastic computer
+- escalabilidade:
+- faas: function as a service (AWS Lambda) 
+- instancias ec2 : máquinas virtuais q subimos na aws
 - provisionar: colocar a maq virtual no ar na nuvem
 - bilhetando
 - redundancia
-- instancias ec2 : máquinas virtuais q subimos na aws
+- região: datacenters - us-east-1 (contas novas) norte da Virginia, Ohio com 6 zonas de disponibilidade isoladas entre si (a, b, c,d,e) e c/ redundância
+- segmentar: separar instancias de servidor web e servidor bd, por ex.
+
+### ec2 dashboard
+- aws.console
+- excluir instancia: instance state: terminate 
+
+#### launch instances
+- aws marketplace: imagens predefinidas
+- criar instancia customizada p/ser usada como imagem (template depois)
+	- incluir script: lauch instace details, advanced details, user data
+	- criar imagem: parar a instancia q vai ser usada p/ não criar uma imagem corrompida `action>image>create image: web-dev-template`
+	- lançar instancia e criar a partir das minhas amis. Não esquece de asscoiar aos sec-group
+	- atenção: na hora de conectar numa instancia criada a partir de uma imagem, o comando q aparece em Connect to Your Instance é c/ usuário root .Usar usuario ec2-user 
+- linux-free tier 1cpu, 1gb de ram, 8gb storage (o serviço de storage é cobrado separadamente)
+- sec group: usar ssh p/ gerenciar maq linux na porta 22, MyIP: só eu uso mas cuidado q esse ip muda toda hora
+- autenticação feita com chaves		
 
 
+#### Actions
+- desabilita o terminate : actions/	instance settings/change termination protection
+- monitor and troubleshoot:	get system log
 
+### gerenciamento remoto da instancia 
+- Conexão c/ SSH 
+	- selecionar a estância lançada e clicar em connect
+	- no mesmo diretório da chave
+`ssh -i "aws-jeffrm.pem" ec2-user@ec2-52-14-243-227.us-east-2.compute.amazonaws.com`
 
-t2.micro free-tier 750h (1 mes) ligada ou 12 meses
+	- no primeiro acesso, o aws vai reclamar pois a sua chave esta com muito acesso. Configurar leitura só p/ o dono `chmod 400 aws-jeffrm.pem`
 
+	- atualizar os pacotes da máquina `sudo yum update` 
 
+	- copia os arquivos localmente p/ a maquina remota `scp -i "aws-jeffrm.pem" volume-exemplo.zip ec2-user@ec2-52-14-225-19.us-east-2.compute.amazonaws.com:~/.`
 
+	- copia os arquivos da maq remota p/ a local `scp -i "aws-jeffrm.pem" ec2-user@ec2-18-188-57-90.us-east-2.compute.amazonaws.com:/home/ec2-user/*.* "C:\Users\Jefferson\Desktop\arquivos_download_playlist\mp3"`
 
-região: us-east-1 (contas novas) norte da Virginia, Ohio com zonas de disponibilidade isoladas entre si (a, b, c,d,e)
+	- ping ip interno da outra máquina
 
-ec2 dashboard
+	- para verificar se as portas 80 (web), 3306 (bd) estã no ar `netstat -ltun`
 
-### security groups
-- acesso web inbound rules type:http/https
-- acesso-remoto inbound rules MyIp (vai mudar sempre)
+	- verifica as permissões (www) ec2-user `cd /var ls -l`
 
-### instances
-actions
-	instance settings
-		change termination protection: desabilita o terminate 
-
-	network
-		change sec group: default - máquinas dentro desse grupo consegue se comunicar entre si
-				  acesso web - permitir o acesso http (apache)
-
-### launch instances
-	aws marketplace: imagens predefinidas
-	criar instancia customizada p/ser usada como imagem (template depois)
-	lauch instace details - advanced details -user data - incluir script
-		linux-free tier 1cpu, 1gb de ram, 8gb storage (o serviço de storage é cobrado separadamente)
-		sec group: usar ssh p/ gerenciar maq linux na porta 22, MyIP: só eu uso mas cuidado q esse ip muda toda hora
-		autenticação feita com chaves		
-
-
-monitor
-	get system log
-
-
-instance state: terminate - exclui instancia
-
-sec group
-inbound: regras de acesso (entrante)
-default vpc sec group: rede dentro da aws. todos os protocolos p/ todas as portas estão permitidos. Para comunicação direta entre as suas instancias
-acesso-web: inbound: http, https, ipv4, ipv6
-
-criar imagem: parar a instancia q vai ser usada p/ não criar uma imagem corrompida 
-action>image>create image: web-dev-template
-minhas amis
-atenção: na hora de conectar numa instancia criada a partir de uma imagem, o comando q aparce p/ conectar é c/ usuário root . usar usuario ec2-user
-
-elastic ip: ip fixo
-alocar um ip 
-associar o ip alocado à uma instancia
-vc é tarifado qdo a instancia c/ o ip associado estiver parada
-vc pode ter + de 1 ip associado a uma mesma instancia: esses outros ips vão ser tarifados
-
------------------------
-chmod 400 aws-jeffrm.pem
-leitura só c/ o dono
-
-scp -i "aws-jeffrm.pem" volume-exemplo.zip ec2-user@ec2-52-14-225-19.us-east-2.compute.amazonaws.com:~/.
-copia os arquivos localmente p/ a maquina remota
-
-scp -i "aws-jeffrm.pem" ec2-user@ec2-18-188-57-90.us-east-2.compute.amazonaws.com:/home/ec2-user/*.* "C:\Users\Jefferson\Desktop\arquivos_download_playlist\mp3"
-copia os arquivos da maq remota p/ a local
-
-gerenciamento remoto da instancia - no mesmo diretório da chave
-ssh -i "aws-jeffrm.pem" ec2-user@ec2-52-14-243-227.us-east-2.compute.amazonaws.com
-
-sudo yum update 
-atualiza os pacotes da máquina
-
-
-ping ip interno da outra máquina
-
-netstat -ltun
-para verificar se as portas 80 (web), 3306 (bco) estã no ar
-
-cd /var
-ls -l
-verifica as permissões (www) ec2-user
-
-parar e desativar o mariadb criado anteriormente c/ script pois vai ser usado o rds
+	- parar e desativar o mariadb criado anteriormente c/ script pois vai ser usado o rds 
+`
 sudo systemctl stop mariadb
 sudo systemctl disable mariadb
+`
 
-para criar uma imagem, parar a maquina
-sudo shutdown -h now
-
----------------------
-
-ebs - elastic block store (discos) - precificação ocorre mesmo c/ a maquina parada
-free tier - 30gb (somatoria dos discos usados)
+	- para criar uma imagem, parar a maquina `sudo shutdown -h now`
 
 
--------------------
-RDS - SERVIÇO BD
-não esqueça de selecionar uma com template free- tier
-admin
-password que será usada p/ conectar com ssh H8NJJaUJkKm9Qv3
+## security groups
+- qdo é criada uma instancia, ela é isolada automaticamente de outras máquinas da rede
+- Para comunicação direta entre as suas instancias (máquinas dentro desse grupo consegue se comunicar entre si)
+	- default vpc sec group: rede dentro da aws. todos os protocolos p/ todas as portas estão permitidos.
+- inbound: regras de acesso (entrante)	
+	- acesso-remoto inbound rules MyIp (vai mudar sempre)
+	- acesso-web: inbound: http, https, ipv4, ipv6
+- acesso ssh a uma maquina: porta 22
+  
+- acesso web - permitir o acesso http (apache)
 
-copiar o endpoint database-1.cmblgshfej2r.us-east-2.rds.amazonaws.com
+## Serviços
 
-comunicação ec2-rds
-incluir o sec group da maquina ec2 usada p/ conectar no ssh na rede default (mesma vpc do bd)
+### elastic ip: ip fixo
+- aloca-lo à uma instancia associando o ip disponível
+- vc é tarifado qdo a instancia c/ o ip associado estiver parada
+- vc pode ter + de 1 ip associado a uma mesma instancia: esses outros ips vão ser tarifados
+- ip publico: só consegui conectar com http e nao c/ https
 
-ja conectado no ssh>> mysql -u admin -h database-1.cmblgshfej2r.us-east-2.rds.amazonaws.com -p
+### ebs: elastic block store (discos) 
+- precificação ocorre mesmo c/ a maquina parada
+- free tier: 30gb (somatoria dos discos usados)
 
----------------
-ip publico: só consegui conectar com http e nao c/ https
+### RDS : SERVIÇO BD
+- não esqueça de selecionar uma com template free- tier
+- as instancias ec2 e rds estão na mesma vpc (rede)
+- copiar o endpoint `database-1.cmblgshfej2r.us-east-2.rds.amazonaws.com`
+- comunicação ec2-rds : incluir o sec group da maquina ec2 usada p/ conectar no ssh na rede default (mesma vpc do bd)
+- ja conectado no ssh: `mysql -u admin -h database-1.cmblgshfej2r.us-east-2.rds.amazonaws.com -p`
+- login: admin H8NJJaUJkKm9Qv3
 
------------------
-Alta disponibilidade - escalar a aplicação
+### Load balancer
+- vai receber todo o tráfego e distribuira p/ todas as instancias (replicas ESCALADAS automaticamente)
 
-Load balancer: vai receber todo o tráfego e distribuira p/ todas as instancias (replicas ESCALADAS automaticamente)
 CRIAR:
 usar o http/https
 nome: LB-webCadastro
